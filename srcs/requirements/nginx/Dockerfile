@@ -1,7 +1,7 @@
 FROM debian:bullseye
 
 RUN apt-get update && apt-get install -y nginx \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*  
 
 RUN apt-get update && apt-get install procps -y
 
@@ -13,4 +13,5 @@ COPY conf/selfsigned.key /etc/nginx/certs/selfsigned.key
 
 EXPOSE 443
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
+# CMD ["nginx", "-g", "daemon off;"]

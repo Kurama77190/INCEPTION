@@ -3,7 +3,9 @@ FROM debian:bullseye
 # 1. Met à jour les paquets et installe MariaDB
 RUN apt-get update && apt-get install -y mariadb-server
 
-RUN mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld
+RUN mkdir -p /run/mysqld && \
+    chown -R mysql:mysql /var/lib/mysql && \
+    chown -R mysql:mysql /run/mysqld
 
 # 2. Copie du fichier de configuration de mariadb
 COPY ./tools/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf

@@ -1,21 +1,22 @@
-#!/bin/sh
-service mysql start 
+#!/bin/bash
 
-# Creer l'utilisateur mariadb #
-echo "CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" | mysql
+# create db
+if [ ! -f "/var/lib/mysql/$MYSQL_DATABASE" ]; then
+    echo CREATING MARIADB
+    mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+    /etc/init.d/mariadb start
 
-# PRIVILGES FOR ROOT AND USER FOR ALL IP ADRESS #
-echo "GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" | mysql
-echo "GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';" | mysql
+    echo "✅ MariaDB est prêt, création de l'utilisateur et de la base..."
 
-echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';" | mysql
-echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';" | mysql
+    # Créer l'utilisateur et la base
+    mariadb -e "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';"
+    mariadb -e "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';"
+    mariadb -e "GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';"
+    mariadb -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';"
+    mariadb -e "FLUSH PRIVILEGES;"
+    mariadb -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
 
-echo "FLUSH PRIVILEGES;" | mysql
-
-# CREAT WORDPRESS DATABASE #
-echo "CREATE DATABASE $MYSQL_DATABASE;" | mysql
-
-kill $(cat /var/run/mysqld/mysqld.pid)
-
-mysqld
+    echo "✅ Configuration terminée. MariaDB attend les connexions."
+    /etc/init.d/mariadb stop
+fi
+exec mariadbd --datadir=/var/lib/mysql
