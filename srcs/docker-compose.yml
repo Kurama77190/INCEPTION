@@ -38,6 +38,7 @@ services:
     networks:
       - inception
 
+  #start_bonus------------------------------------------
   adminer:
     build: ./requirements/adminer
     container_name: adminer
@@ -46,6 +47,59 @@ services:
       - "80"
     networks:
       - inception
+
+  redis:
+    build: ./requirements/redis
+    container_name: redis
+    restart: always
+    networks:
+      - inception
+
+  ftp:
+    build: ./requirements/ftp
+    container_name: ftp
+    restart: always
+    depends_on:
+      - wordpress
+    ports:
+      - "21:21"
+      - "21000-21009:21000-21009"
+    volumes:
+      - wordpress_data:/var/www/html
+    env_file:
+      - .env
+    networks:
+      - inception
+
+  static:
+    build: ./requirements/static
+    container_name: static
+    restart: always
+    expose:
+      - "80"
+    networks:
+      - inception
+    
+  grafana:
+    build: ./requirements/grafana
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+    expose:
+      - "3000"
+    env_file:
+      - .env
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    networks:
+      - inception
+    depends_on:
+      - wordpress
+      - mariadb
+  
+  #end_bonus------------------------------------------
 
 networks:
   inception:
@@ -66,3 +120,10 @@ volumes:
       type: 'none'
       o: 'bind'
       device: /home/sben-tay/data/wordpress
+  
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: /home/sben-tay/data/grafana

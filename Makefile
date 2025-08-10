@@ -3,8 +3,8 @@ COMPOSE_FILE=srcs/docker-compose.yml
 DATA=/home/sben-tay/data/
 
 all:
+	sudo mkdir -p $(DATA)wordpress $(DATA)mariadb $(DATA)grafana
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up --build
-	sudo mkdir -p $(DATA)wordpress $(DATA)mariadb
 
 re: fclean all
 
@@ -15,4 +15,4 @@ fclean: clean
 	docker system prune -fa
 	sudo rm -rf $(DATA)
 
-.PHONY: all re clean fclean
+.PHONY: all re clean fclean 

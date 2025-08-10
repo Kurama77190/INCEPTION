@@ -17,6 +17,10 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp
 
+# BONUS relais SMTP
+RUN apt-get update && apt-get install -y msmtp ca-certificates
+
+
 # Copie de la config du pool PHP
 COPY ./tools/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
